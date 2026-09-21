@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#0a0c0b">
+<title>KiwiEx Admin</title>
+<link rel="icon" type="image/png" href="logo.png">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
+:root{
+ --bg:#090b0a;--surface:#101311;--surface2:#151916;--line:#252b27;--line2:#343c35;
+ --text:#f3f6f3;--muted:#8d988f;--accent:#9bf54b;--red:#ff667a;--amber:#f4c95d;
+}
+*{box-sizing:border-box}
+html{background:var(--bg);color-scheme:dark}
+body{margin:0;background:radial-gradient(circle at 20% -10%,rgba(155,245,75,.06),transparent 34rem),var(--bg);color:var(--text);font-family:"Manrope",system-ui,sans-serif;min-height:100vh}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.top{height:64px;border-bottom:1px solid var(--line);background:rgba(9,11,10,.94);backdrop-filter:blur(18px);display:flex;align-items:center;padding:0 22px;position:sticky;top:0;z-index:20}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;font-size:19px}.brand img{width:34px;height:34px;border-radius:10px}.brand em{font-style:normal;color:var(--accent)}
+.admin-pill{margin-left:8px;border:1px solid #344036;border-radius:999px;padding:4px 8px;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.09em;font-weight:800}
+.status{margin-left:auto;display:flex;align-items:center;gap:7px;color:var(--muted);font-size:10px}.status i{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(155,245,75,.08)}
+.network-live{color:var(--accent)!important}
+.network-live::before{content:"● ";font-size:8px}
+.pulse-flash{animation:feeFlash .32s ease}
+@keyframes feeFlash{0%{background:rgba(155,245,75,.16)}100%{background:transparent}}
+.usercell{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#aeb8b0}
+
+.wrap{width:min(1180px,calc(100% - 28px));margin:0 auto;padding:30px 0 70px}
+.hero{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:20px}.hero h1{margin:0;font-size:31px;letter-spacing:-1.2px}.hero p{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.55;max-width:650px}
+.badge{border:1px solid var(--line2);background:var(--surface);border-radius:9px;padding:8px 10px;color:var(--muted);font-size:10px;white-space:nowrap}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:12px}
+.card,.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.card{padding:16px}.card span{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}.card strong{display:block;font-size:23px;margin-top:7px;letter-spacing:-.5px}.card small{display:block;color:var(--muted);font-size:9px;margin-top:5px}
+.grid{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr);gap:12px}
+.panel-head{height:51px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 15px}.panel-head h2{font-size:12px;margin:0}.panel-head small{font-size:9px;color:var(--muted)}
+.panel-body{padding:15px}
+.field{margin-bottom:13px}.field label{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:10px;margin-bottom:7px}.field label b{color:#d8dfda}
+.field textarea,.field select{width:100%;border:1px solid var(--line2);background:#0b0e0c;color:var(--text);border-radius:9px;outline:0;padding:11px 12px}
+.field textarea{min-height:104px;resize:vertical;font:10px ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}
+.field textarea:focus,.field select:focus{border-color:rgba(155,245,75,.55);box-shadow:0 0 0 3px rgba(155,245,75,.06)}
+.btn{border:1px solid var(--line2);background:var(--surface2);color:var(--text);border-radius:9px;padding:10px 13px;font-size:11px;font-weight:850}.btn:hover{border-color:#465147}.btn.primary{background:var(--accent);border-color:var(--accent);color:#081006}.btn.danger{color:#ff99a7;border-color:rgba(255,102,122,.28);background:rgba(255,102,122,.06)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+.payout{border:1px solid rgba(155,245,75,.22);background:rgba(155,245,75,.045);border-radius:10px;padding:13px;margin:13px 0}.payout span{font-size:9px;text-transform:uppercase;color:var(--muted);letter-spacing:.06em}.payout strong{display:block;font-size:25px;margin-top:4px}.payout small{display:block;margin-top:5px;color:var(--muted);font-size:9px}
+.keybox{background:#090c0a;border:1px solid var(--line2);border-radius:9px;padding:10px;font:10px ui-monospace,SFMono-Regular,Menlo,monospace;color:#c4cdc6;word-break:break-all;max-height:130px;overflow:auto;line-height:1.5}
+.pending{border-top:1px solid var(--line);margin-top:15px;padding-top:15px}
+.warning{border:1px solid rgba(244,201,93,.22);background:rgba(244,201,93,.05);color:#c7b77c;border-radius:9px;padding:10px 11px;font-size:9px;line-height:1.5;margin-bottom:13px}
+.table-head,.row{display:grid;grid-template-columns:72px 80px minmax(70px,1fr) 100px 105px;gap:9px;align-items:center}
+.table-head{padding:8px 12px;color:var(--muted);font-size:8px;text-transform:uppercase;letter-spacing:.07em;border-bottom:1px solid var(--line)}
+.row{padding:9px 12px;border-bottom:1px solid rgba(37,43,39,.65);font-size:10px}.row:last-child{border-bottom:0}
+.side-buy{color:var(--accent);font-weight:800}.side-sell{color:var(--red);font-weight:800}.num{text-align:right}
+.scroll{max-height:385px;overflow:auto}.empty{padding:34px 16px;text-align:center;color:var(--muted);font-size:11px}
+.cashout-row{padding:11px 13px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;font-size:10px}.cashout-row:last-child{border-bottom:0}.cashout-row span{color:var(--muted)}
+.footer-note{margin-top:15px;color:#687169;font-size:9px;line-height:1.55}
+.toast{position:fixed;right:16px;top:78px;z-index:50;background:#141915;border:1px solid #354036;border-radius:9px;padding:11px 13px;font-size:11px;box-shadow:0 18px 50px rgba(0,0,0,.35);transform:translateX(calc(100% + 28px));transition:.18s}.toast.show{transform:translateX(0)}
+@media(max-width:880px){.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}.table-head,.row{grid-template-columns:62px 68px minmax(70px,1fr) 88px 92px}}
+@media(max-width:560px){.top{padding:0 11px}.brand{font-size:17px}.status span{display:none}.wrap{width:calc(100% - 18px);padding-top:18px}.cards{grid-template-columns:1fr 1fr;gap:8px}.card{padding:12px}.card strong{font-size:18px}.hero h1{font-size:25px}.table-head,.row{grid-template-columns:57px 63px minmax(60px,1fr) 76px}.table-head>*:nth-child(4),.row>*:nth-child(4){display:none}}
+
+.top-logout{
+  margin-left:10px;border:1px solid var(--line2);background:#151916;color:var(--text);
+  border-radius:8px;padding:8px 10px;font-size:10px;font-weight:800
+}
+.top-logout:hover{border-color:#465147}
+.admin-login{
+  position:fixed;inset:0;z-index:100;background:rgba(6,8,7,.97);backdrop-filter:blur(14px);
+  display:grid;place-items:center;padding:18px
+}
+.admin-login-card{
+  width:min(470px,100%);background:#101311;border:1px solid var(--line2);border-radius:14px;
+  padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.45)
+}
+.admin-login-card h1{margin:0 0 7px;font-size:23px;letter-spacing:-.7px}
+.admin-login-card p{margin:0 0 17px;color:var(--muted);font-size:11px;line-height:1.6}
+.admin-login-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#0b0e0c;border:1px solid var(--line);border-radius:9px;padding:3px;margin-bottom:14px}
+.admin-login-tabs button{border:0;background:transparent;color:var(--muted);border-radius:6px;padding:8px;font-size:10px;font-weight:850}
+.admin-login-tabs button.active{background:#1b211c;color:var(--text)}
+.admin-pane{display:none}.admin-pane.active{display:block}
+.admin-token-out{margin-top:13px}
+.passive-note{
+  margin-top:12px;border:1px solid rgba(155,245,75,.18);background:rgba(155,245,75,.04);
+  border-radius:9px;padding:10px;color:#aab7ac;font-size:9px;line-height:1.55
+}
+.session-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.session-chip{border:1px solid var(--line);border-radius:999px;padding:5px 8px;color:var(--muted);font-size:9px}
+@media(max-width:560px){.status .top-logout{padding:7px 8px;font-size:9px}.admin-login-card{padding:16px}}
+
+</style>
+</head>
+<body>
+
+<div class="admin-login" id="adminLogin">
+  <div class="admin-login-card">
+    <div class="brand" style="margin-bottom:18px"><img src="logo.png" alt="">Kiwi<em>Ex</em><span class="admin-pill">Treasury</span></div>
+    <h1 id="loginHeading">Treasury access</h1>
+    <p id="loginSub">Open a new simulated network treasury at $0.00 or restore an existing admin token. Restored treasuries accrue passive fee revenue for the time you were logged out.</p>
+
+    <div class="admin-login-tabs">
+      <button class="active" data-admin-mode="restore">Restore token</button>
+      <button data-admin-mode="new">New treasury</button>
+    </div>
+
+    <div class="admin-pane active" id="admin-restore">
+      <div class="field">
+        <label><span>KiwiEx admin token</span><b>KXA1</b></label>
+        <textarea id="adminTokenInput" spellcheck="false" placeholder="KXA1..."></textarea>
+      </div>
+      <button class="btn primary" id="restoreAdmin" style="width:100%">Restore treasury</button>
+    </div>
+
+    <div class="admin-pane" id="admin-new">
+      <p style="margin:0 0 12px;color:var(--muted);font-size:10px;line-height:1.55">A new treasury begins at exactly $0.00 and starts collecting simulated KiwiEx fees immediately.</p>
+      <button class="btn primary" id="newAdmin" style="width:100%">Start new treasury</button>
+    </div>
+
+    <div class="admin-token-out hidden" id="loggedOutTokenBox">
+      <div class="field">
+        <label><span>Your updated admin token</span><b id="adminTokenLength"></b></label>
+        <div class="keybox" id="adminTokenOut"></div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="copyAdminToken">Copy token</button>
+        <button class="btn" id="returnToLogin">Back to sign in</button>
+      </div>
+      <div class="passive-note">This token contains your current treasury state and logout timestamp. Passive fee growth is calculated when you restore it later.</div>
+    </div>
+  </div>
+</div>
+
+<header class="top">
+ <div class="brand"><img src="logo.png" alt="">Kiwi<em>Ex</em><span class="admin-pill">Admin</span></div>
+ <div class="status"><i></i><span>Live network simulation</span><button class="top-logout hidden" id="logoutBtn">Export &amp; log out</button></div>
+</header>
+
+<main class="wrap">
+ <div class="hero">
+  <div><h1>Fee Treasury</h1><p>A live simulated stream of KiwiEx users buying and selling across the market. Every simulated trade pays the 0.25% KiwiEx fee into this treasury in real time.</p></div>
+  <div>
+    <div class="badge">Network feed: <b id="networkStatus">LIVE</b></div>
+    <div class="session-stats">
+      <span class="session-chip" id="sessionTradeRate">0 trades/min</span>
+      <span class="session-chip" id="passiveCredit">No passive credit this login</span>
+    </div>
+  </div>
+ </div>
+
+ <section class="cards">
+  <div class="card"><span>Available to cash out</span><strong id="available">$0.00</strong><small id="dust">No sub-cent dust</small></div>
+  <div class="card"><span>Lifetime fee revenue</span><strong id="lifetime">$0.00</strong><small id="trades">0 fee-generating trades</small></div>
+  <div class="card"><span>Buy-side fees</span><strong id="buyFees">$0.00</strong><small id="buyShare">0% of lifetime revenue</small></div>
+  <div class="card"><span>Sell-side fees</span><strong id="sellFees">$0.00</strong><small id="lastFee">No fees collected yet</small></div>
+ </section>
+
+ <section class="grid">
+  <div>
+   <div class="panel">
+    <div class="panel-head"><h2>Recent fee events</h2><small>Latest 15</small></div>
+    <div class="table-head"><span>Side</span><span>Asset</span><span>User</span><span class="num">Notional</span><span class="num">Fee</span></div>
+    <div class="scroll" id="feeRows"></div>
+   </div>
+
+   <div class="panel" style="margin-top:12px">
+    <div class="panel-head"><h2>Cashout history</h2><small>This admin session</small></div>
+    <div id="cashoutRows"></div>
+   </div>
+  </div>
+
+  <aside class="panel">
+   <div class="panel-head"><h2>Cash out to Ledgered</h2><small>Entire payable treasury</small></div>
+   <div class="panel-body">
+    <div class="warning">This page does not store your Ledgered key. After KiwiEx successfully reads it, the input is cleared. The updated Ledgered key is generated locally in this browser.</div>
+
+    <div class="payout">
+      <span>Current payable amount</span>
+      <strong id="payoutAmount">$0.00</strong>
+      <small>Ledgered settles balances to cents. Any fraction of a cent remains in the KiwiEx treasury.</small>
+    </div>
+
+    <div class="field">
+      <label><span>Ledgered token</span><b>LEDGER1</b></label>
+      <textarea id="ledgerToken" spellcheck="false" placeholder="Paste your LEDGER1... token"></textarea>
+    </div>
+    <button class="btn" id="readLedger" style="width:100%">Read Ledgered accounts</button>
+
+    <div id="ledgerControls" class="hidden" style="margin-top:14px">
+      <div class="field">
+       <label><span>Deposit revenue into</span><b id="selectedBalance"></b></label>
+       <select id="ledgerAccount"></select>
+      </div>
+      <button class="btn primary" id="prepareCashout" style="width:100%">Prepare full cashout</button>
+    </div>
+
+    <div class="pending hidden" id="pending">
+      <div class="field"><label><span>Updated Ledgered token</span><b id="pendingAmount"></b></label><div class="keybox" id="updatedLedger"></div></div>
+      <div class="actions">
+       <button class="btn primary" id="copyUpdated">Copy updated Ledgered token</button>
+       <button class="btn" id="finalize">Finalize cashout</button>
+       <button class="btn danger" id="cancel">Cancel</button>
+      </div>
+      <div class="footer-note">Finalize only after you have saved the updated Ledgered token. Until then, the fee balance remains untouched.</div>
+    </div>
+
+    <div class="footer-note">This is a simulated global KiwiEx fee stream for the Ledgered universe. Reloading the admin page starts a brand-new treasury at $0.00.</div>
+   </div>
+  </aside>
+ </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+(()=>{
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const FEE_RATE=.0025;
+
+/* Exact same 14 KiwiEx markets used by the public exchange. */
+const COINS=[
+ {symbol:"DOGE",weight:953e6},{symbol:"SHIB",weight:91.8e6},{symbol:"PEPE",weight:514.7e6},
+ {symbol:"PUMP",weight:136.9e6},{symbol:"BONK",weight:69.8e6},{symbol:"WIF",weight:102.2e6},
+ {symbol:"FLOKI",weight:25.2e6},{symbol:"PENGU",weight:80e6},{symbol:"BRETT",weight:39e6},
+ {symbol:"MOG",weight:24e6},{symbol:"TURBO",weight:31e6},{symbol:"NEIRO",weight:19e6},
+ {symbol:"POPCAT",weight:29e6},{symbol:"FARTCOIN",weight:85e6}
+];
+const TOTAL_COIN_WEIGHT=COINS.reduce((s,c)=>s+c.weight,0);
+const USER_PREFIX=["moon","kiwi","degen","chart","wick","candle","green","meme","bag","ape","alpha","night","north","pixel","cash","fast","token","frog","doge","pepe"];
+const USER_SUFFIX=["boy","girl","trader","king","queen","desk","capital","420","777","x","labs","fund","moves","watch","flow","max","coin","lord","cat","ape"];
+
+let ledger=null,pending=null,adminActive=false;
+let treasury=freshTreasury();
+let eventTimer=null,rateTimer=null,eventTimes=[];
+let passiveAdded=0;
+
+const money=n=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n)||0);
+const moneyFine=n=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",minimumFractionDigits:2,maximumFractionDigits:6}).format(Number(n)||0);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const rid=()=>Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-5);
+const roundMoney=n=>Math.round((Number(n)+Number.EPSILON)*100)/100;
+const rand=(a,b,r=Math.random())=>a+r*(b-a);
+
+function freshTreasury(){
+ return{
+  version:1,seed:Math.floor(Math.random()*2147483647)||1,
+  balance:0,lifetime:0,buyFees:0,sellFees:0,tradeCount:0,lastFeeAt:0,
+  lastSavedAt:Date.now(),cashouts:[],recent:[]
+ };
+}
+function utf8ToBase64URL(text){
+ const bytes=new TextEncoder().encode(text);let binary="",chunk=0x8000;
+ for(let i=0;i<bytes.length;i+=chunk)binary+=String.fromCharCode(...bytes.subarray(i,i+chunk));
+ return btoa(binary).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+function base64URLToUTF8(base64){
+ base64=base64.replace(/-/g,"+").replace(/_/g,"/");
+ while(base64.length%4)base64+="=";
+ const binary=atob(base64),bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+ return new TextDecoder().decode(bytes);
+}
+function adminToken(){
+ const p=[
+  1,treasury.seed,
+  Number(treasury.balance.toFixed(6)),
+  Number(treasury.lifetime.toFixed(6)),
+  Number(treasury.buyFees.toFixed(6)),
+  Number(treasury.sellFees.toFixed(6)),
+  Math.floor(treasury.tradeCount),
+  Date.now()
+ ];
+ return "KXA1."+utf8ToBase64URL(JSON.stringify(p));
+}
+function parseAdminToken(token){
+ token=String(token||"").trim();
+ if(!token.startsWith("KXA1."))throw new Error("That is not a KiwiEx KXA1 admin token.");
+ let p;
+ try{p=JSON.parse(base64URLToUTF8(token.slice(5)))}catch(e){throw new Error("This KiwiEx admin token could not be decoded.");}
+ if(!Array.isArray(p)||p[0]!==1||!Number.isFinite(p[1])||!Number.isFinite(p[2])||!Number.isFinite(p[3])||!Number.isFinite(p[4])||!Number.isFinite(p[5])||!Number.isFinite(p[6])||!Number.isFinite(p[7]))throw new Error("Invalid KiwiEx admin token.");
+ return{
+  version:1,seed:Math.max(1,Math.floor(p[1])),
+  balance:Math.max(0,p[2]),lifetime:Math.max(0,p[3]),
+  buyFees:Math.max(0,p[4]),sellFees:Math.max(0,p[5]),
+  tradeCount:Math.max(0,Math.floor(p[6])),lastFeeAt:0,
+  lastSavedAt:Math.floor(p[7]),cashouts:[],recent:[]
+ };
+}
+function toast(s){const t=$("#toast");t.textContent=s;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),2400)}
+function payable(){return Math.floor((treasury.balance+1e-9)*100)/100}
+
+/* Deterministic PRNG used for passive/offline simulation. */
+function hash32(a,b){
+ let x=(a^b)>>>0;
+ x=Math.imul(x^(x>>>16),0x45d9f3b);
+ x=Math.imul(x^(x>>>16),0x45d9f3b);
+ return (x^(x>>>16))>>>0;
+}
+function unit(seed,index){return hash32(seed,index)/4294967296}
+
+/* This trade-size model is used BOTH live and offline.
+   0.25% of each trade's notional becomes KiwiEx revenue. */
+function notionalFromUnit(r,u){
+ if(r<.38)return rand(15,650,u);
+ if(r<.68)return rand(650,5000,u);
+ if(r<.88)return rand(5000,30000,u);
+ if(r<.975)return rand(30000,180000,u);
+ return rand(180000,1250000,u);
+}
+function expectedNotional(){
+ return .38*((15+650)/2)
+      + .30*((650+5000)/2)
+      + .20*((5000+30000)/2)
+      + .095*((30000+180000)/2)
+      + .025*((180000+1250000)/2);
+}
+const EXPECTED_NOTIONAL=expectedNotional();
+
+/* Same arrival distribution as the live admin event loop. */
+function waitFromUnit(roll,u){
+ if(roll<.12)return rand(130,420,u);
+ if(roll<.72)return rand(420,1350,u);
+ if(roll<.94)return rand(1350,2800,u);
+ return rand(2800,5200,u);
+}
+function expectedWaitMs(){
+ return .12*((130+420)/2)
+      + .60*((420+1350)/2)
+      + .22*((1350+2800)/2)
+      + .06*((2800+5200)/2);
+}
+const EXPECTED_WAIT_MS=expectedWaitMs();
+const EXPECTED_TRADES_PER_MS=1/EXPECTED_WAIT_MS;
+
+function pickWeightedCoin(u){
+ let target=u*TOTAL_COIN_WEIGHT;
+ for(const c of COINS){target-=c.weight;if(target<=0)return c}
+ return COINS[COINS.length-1];
+}
+function fakeUser(r1,r2,r3){
+ const a=USER_PREFIX[Math.floor(r1*USER_PREFIX.length)%USER_PREFIX.length];
+ const b=USER_SUFFIX[Math.floor(r2*USER_SUFFIX.length)%USER_SUFFIX.length];
+ return "@"+a+b+(r3<.62?Math.floor(2+r3*9997):"");
+}
+
+/* Apply passive growth for elapsed logout time. We use the exact expected
+   trade arrival rate, exact notional mixture, and exact 0.25% fee. The small
+   deterministic variance keeps two different tokens from growing identically,
+   but average revenue is mathematically consistent with the live system. */
+function applyPassiveGrowth(savedAt){
+ const now=Date.now(),elapsed=Math.max(0,now-(Number(savedAt)||now));
+ if(elapsed<1000)return 0;
+
+ const expectedTrades=elapsed*EXPECTED_TRADES_PER_MS;
+ const bucket=Math.floor((Number(savedAt)||0)/60000);
+ const variance=.92+unit(treasury.seed,bucket)*.16; // ±8%, deterministic
+ const passiveTrades=Math.max(0,Math.floor(expectedTrades*variance));
+ const avgNotionalVariance=.94+unit(treasury.seed,bucket+99173)*.12;
+ const grossNotional=passiveTrades*EXPECTED_NOTIONAL*avgNotionalVariance;
+ const fees=grossNotional*FEE_RATE;
+
+ const buyRatio=.535;
+ const buys=Math.floor(passiveTrades*buyRatio);
+ const sells=passiveTrades-buys;
+ const buyFees=fees*buyRatio;
+ const sellFees=fees-buyFees;
+
+ treasury.balance+=fees;
+ treasury.lifetime+=fees;
+ treasury.buyFees+=buyFees;
+ treasury.sellFees+=sellFees;
+ treasury.tradeCount+=passiveTrades;
+ treasury.lastFeeAt=now;
+ treasury.lastSavedAt=now;
+ passiveAdded=fees;
+ return fees;
+}
+
+function liveTrade(){
+ if(!adminActive)return;
+ const r1=Math.random(),r2=Math.random(),r3=Math.random(),r4=Math.random(),r5=Math.random(),r6=Math.random();
+ const side=r1<.535?"buy":"sell";
+ const coin=pickWeightedCoin(r2);
+ const notional=notionalFromUnit(r3,r4);
+ const fee=notional*FEE_RATE;
+ const at=Date.now();
+ const ev={id:rid(),at,side,symbol:coin.symbol,user:fakeUser(r4,r5,r6),notional,fee};
+
+ treasury.balance+=fee;
+ treasury.lifetime+=fee;
+ if(side==="buy")treasury.buyFees+=fee;else treasury.sellFees+=fee;
+ treasury.tradeCount++;
+ treasury.lastFeeAt=at;
+ treasury.lastSavedAt=at;
+ treasury.recent.unshift(ev);
+ treasury.recent=treasury.recent.slice(0,15);
+
+ eventTimes.push(at);
+ eventTimes=eventTimes.filter(t=>at-t<=60000);
+ flashRevenue();
+ render();
+ scheduleNextTrade();
+}
+function scheduleNextTrade(){
+ clearTimeout(eventTimer);
+ if(!adminActive)return;
+ const roll=Math.random(),u=Math.random();
+ eventTimer=setTimeout(liveTrade,waitFromUnit(roll,u));
+}
+function flashRevenue(){
+ const card=$("#available")?.closest(".card");
+ if(!card)return;
+ card.classList.remove("pulse-flash");
+ void card.offsetWidth;
+ card.classList.add("pulse-flash");
+}
+
+function render(){
+ const pay=payable(),dust=Math.max(0,treasury.balance-pay);
+ $("#available").textContent=money(pay);
+ $("#payoutAmount").textContent=money(pay);
+ $("#lifetime").textContent=moneyFine(treasury.lifetime);
+ $("#buyFees").textContent=moneyFine(treasury.buyFees);
+ $("#sellFees").textContent=moneyFine(treasury.sellFees);
+ $("#trades").textContent=treasury.tradeCount.toLocaleString()+" simulated trades";
+ $("#buyShare").textContent=(treasury.lifetime>0?(treasury.buyFees/treasury.lifetime*100):0).toFixed(1)+"% of fee revenue";
+ $("#lastFee").textContent=treasury.lastFeeAt?"Last fee "+new Date(treasury.lastFeeAt).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"}):"Waiting for first trade…";
+ $("#dust").textContent=dust>=.000001?moneyFine(dust)+" sub-cent dust retained":"No sub-cent dust";
+
+ const tpm=eventTimes.filter(t=>Date.now()-t<=60000).length;
+ const status=$("#networkStatus");
+ if(status){status.textContent=tpm.toLocaleString()+" trades/min";status.className="network-live"}
+ if($("#sessionTradeRate"))$("#sessionTradeRate").textContent=tpm.toLocaleString()+" live trades/min";
+ if($("#passiveCredit"))$("#passiveCredit").textContent=passiveAdded>0?("+"+money(passiveAdded)+" passive fees restored"):"No passive credit this login";
+
+ $("#feeRows").innerHTML=treasury.recent.length?treasury.recent.slice(0,15).map(x=>`<div class="row">
+   <span class="${x.side==="buy"?"side-buy":"side-sell"}">${esc(x.side.toUpperCase())}</span>
+   <b>${esc(x.symbol)}</b>
+   <span class="usercell">${esc(x.user)}</span>
+   <span class="num">${money(x.notional)}</span>
+   <b class="num">${moneyFine(x.fee)}</b>
+ </div>`).join(""):`<div class="empty">Waiting for simulated KiwiEx users to start trading…</div>`;
+
+ $("#cashoutRows").innerHTML=treasury.cashouts.length?treasury.cashouts.map(x=>`<div class="cashout-row"><div><b>${money(x.amount)}</b><br><span>${esc(x.account||"Ledgered account")}</span></div><span>${new Date(x.at).toLocaleString()}</span></div>`).join(""):`<div class="empty">No fee cashouts in this admin session yet.</div>`;
+
+ $("#prepareCashout").disabled=pay<=0||!ledger;
+ if(pending){
+   $("#pendingAmount").textContent=money(pending.amount);
+   $("#updatedLedger").textContent=pending.token;
+ }
+}
+
+function startAdmin(newTreasury){
+ if(newTreasury)treasury=freshTreasury();
+ passiveAdded=0;
+ adminActive=true;
+ $("#adminLogin").classList.add("hidden");
+ $("#logoutBtn").classList.remove("hidden");
+ eventTimes=[];
+ render();
+ clearTimeout(eventTimer);
+ setTimeout(liveTrade,650);
+}
+function restoreAdmin(){
+ try{
+   const token=$("#adminTokenInput").value.trim();
+   treasury=parseAdminToken(token);
+   $("#adminTokenInput").value="";
+   passiveAdded=applyPassiveGrowth(treasury.lastSavedAt);
+   adminActive=true;
+   $("#adminLogin").classList.add("hidden");
+   $("#logoutBtn").classList.remove("hidden");
+   eventTimes=[];
+   render();
+   clearTimeout(eventTimer);
+   setTimeout(liveTrade,650);
+   toast(passiveAdded>0?`${money(passiveAdded)} in passive fees accrued while you were away.`:"Treasury restored.");
+ }catch(e){toast(e.message||"Could not restore admin token.")}
+}
+function logoutAdmin(){
+ if(!adminActive)return;
+ adminActive=false;
+ clearTimeout(eventTimer);
+ const token=adminToken();
+ treasury.lastSavedAt=Date.now();
+ $("#adminTokenOut").textContent=token;
+ $("#adminTokenLength").textContent=token.length+" characters";
+ $("#loggedOutTokenBox").classList.remove("hidden");
+ $("#admin-restore").classList.add("hidden");
+ $("#admin-new").classList.add("hidden");
+ $$(".admin-login-tabs button").forEach(b=>b.classList.remove("active"));
+ $("#adminLogin").classList.remove("hidden");
+ $("#logoutBtn").classList.add("hidden");
+}
+
+function decodeLedgerToken(token){
+ token=String(token||"").trim();
+ if(!token.startsWith("LEDGER1."))throw new Error("That is not a Ledgered LEDGER1 token.");
+ let data;
+ try{data=JSON.parse(base64URLToUTF8(token.slice(8)))}catch(e){throw new Error("This Ledgered token could not be decoded.");}
+ if(!data||typeof data.name!=="string"||!Array.isArray(data.accounts)||!Array.isArray(data.transactions))throw new Error("Invalid Ledgered token data.");
+ data.accounts=data.accounts.map(a=>({id:a.id||rid(),name:String(a.name||"Account"),type:String(a.type||"Other"),balance:roundMoney(Number(a.balance)||0)}));
+ data.transactions=data.transactions.slice(0,15);
+ return data;
+}
+function encodeLedgerToken(data){
+ return "LEDGER1."+utf8ToBase64URL(JSON.stringify({version:1,name:data.name,accounts:data.accounts,transactions:data.transactions.slice(0,15)}));
+}
+function renderAccounts(){
+ $("#ledgerAccount").innerHTML=ledger.accounts.map((a,i)=>`<option value="${i}">${esc(a.name)} — ${money(a.balance)}</option>`).join("");
+ $("#ledgerControls").classList.remove("hidden");
+ updateSelected();
+ render();
+}
+function updateSelected(){
+ if(!ledger)return;
+ const a=ledger.accounts[Number($("#ledgerAccount").value)||0];
+ $("#selectedBalance").textContent=a?money(a.balance):"";
+}
+
+/* Login UI */
+$$("[data-admin-mode]").forEach(b=>b.addEventListener("click",()=>{
+ $("#loggedOutTokenBox").classList.add("hidden");
+ $$("[data-admin-mode]").forEach(x=>x.classList.toggle("active",x===b));
+ $$(".admin-pane").forEach(x=>x.classList.toggle("active",x.id==="admin-"+b.dataset.adminMode));
+}));
+$("#restoreAdmin").addEventListener("click",restoreAdmin);
+$("#newAdmin").addEventListener("click",()=>startAdmin(true));
+$("#logoutBtn").addEventListener("click",logoutAdmin);
+$("#returnToLogin").addEventListener("click",()=>{
+ $("#loggedOutTokenBox").classList.add("hidden");
+ $("#admin-restore").classList.add("active");
+ $("#admin-new").classList.remove("active");
+ $$("[data-admin-mode]").forEach(b=>b.classList.toggle("active",b.dataset.adminMode==="restore"));
+});
+$("#copyAdminToken").addEventListener("click",async()=>{
+ const token=$("#adminTokenOut").textContent.trim();
+ try{await navigator.clipboard.writeText(token);toast("Admin token copied.");}
+ catch(e){toast("Select the token and copy it manually.");}
+});
+
+$("#readLedger").addEventListener("click",()=>{
+ try{
+  ledger=decodeLedgerToken($("#ledgerToken").value);
+  $("#ledgerToken").value="";
+  pending=null;$("#pending").classList.add("hidden");
+  renderAccounts();toast("Ledgered accounts loaded.");
+ }catch(e){
+  ledger=null;$("#ledgerControls").classList.add("hidden");$("#pending").classList.add("hidden");
+  toast(e.message||"Could not read Ledgered token.");
+ }
+});
+$("#ledgerAccount").addEventListener("change",updateSelected);
+
+$("#prepareCashout").addEventListener("click",()=>{
+ const amount=payable();
+ if(!(amount>0))return toast("There are no payable fees to cash out.");
+ if(!ledger)return toast("Read your Ledgered token first.");
+ const idx=Number($("#ledgerAccount").value)||0,a=ledger.accounts[idx];
+ if(!a)return toast("Choose a Ledgered account.");
+
+ const updated=JSON.parse(JSON.stringify(ledger)),target=updated.accounts[idx];
+ target.balance=roundMoney(target.balance+amount);
+ updated.transactions.unshift({id:rid(),type:"in",title:"KiwiEx fee payout",description:"Simulated KiwiEx trading fee revenue",amount,account:target.name,date:Date.now()});
+ updated.transactions=updated.transactions.slice(0,15);
+ pending={amount,account:target.name,createdAt:Date.now(),token:encodeLedgerToken(updated),updatedLedger:updated};
+ $("#updatedLedger").textContent=pending.token;$("#pendingAmount").textContent=money(amount);$("#pending").classList.remove("hidden");
+ toast("Full fee payout prepared.");
+});
+$("#copyUpdated").addEventListener("click",async()=>{
+ if(!pending)return;
+ try{await navigator.clipboard.writeText(pending.token);toast("Updated Ledgered token copied.");}
+ catch(e){toast("Select the token and copy it manually.");}
+});
+$("#cancel").addEventListener("click",()=>{pending=null;$("#pending").classList.add("hidden");toast("Prepared cashout cancelled.")});
+$("#finalize").addEventListener("click",()=>{
+ if(!pending)return;
+ if(treasury.balance+1e-9<pending.amount){pending=null;$("#pending").classList.add("hidden");render();return toast("Treasury changed unexpectedly. Prepare the payout again.")}
+ treasury.balance=Math.max(0,treasury.balance-pending.amount);
+ treasury.cashouts.unshift({id:rid(),at:Date.now(),amount:pending.amount,account:pending.account});
+ treasury.cashouts=treasury.cashouts.slice(0,15);
+ ledger=pending.updatedLedger;pending=null;$("#pending").classList.add("hidden");
+ renderAccounts();render();toast("Fee cashout finalized. New fees are still coming in.");
+});
+
+/* Login screen starts visible. A new treasury is exactly $0 until the user opens it. */
+render();
+rateTimer=setInterval(()=>{
+ if(!adminActive)return;
+ eventTimes=eventTimes.filter(t=>Date.now()-t<=60000);
+ render();
+},1000);
+})();
+</script>
+
+<script id="kiwiexCleanRoutes">
+(function(){
+  const routeFiles={trade:"trade.html",about:"about.html",admin:"admin.html"};
+
+  /* When testing the flat files locally, extensionless files do not exist,
+     so transparently send clean-link clicks to the real HTML file. */
+  if(location.protocol==="file:"){
+    document.addEventListener("click",function(e){
+      const a=e.target.closest("a[href]");
+      if(!a)return;
+      const href=a.getAttribute("href");
+      if(routeFiles[href]){
+        e.preventDefault();
+        location.href=routeFiles[href];
+      }
+    });
+    return;
+  }
+
+  /* When a real .html file is reached on GitHub Pages, keep the loaded
+     document but clean the visible URL. */
+  if(location.protocol==="http:"||location.protocol==="https:"){
+    const path=location.pathname;
+    const match=path.match(/\/(trade|about|admin)\.html$/);
+    if(match){
+      history.replaceState(null,"",path.replace(/\.html$/,"")+location.search+location.hash);
+    }
+  }
+})();
+</script>
+
+</body>
+</html>
