@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>KiwiEx</title>
+<style>html,body{margin:0;background:#090b0a;color:#f3f6f3;font:14px system-ui,sans-serif}</style>
+</head>
+<body>
+<script>
+(function(){
+  const routeFiles={trade:"trade.html",about:"about.html",admin:"admin.html"};
+  const path=location.pathname;
+  const slash=path.lastIndexOf("/");
+  const route=path.slice(slash+1);
+  const file=routeFiles[route];
+  if(file){
+    const base=path.slice(0,slash+1);
+    location.replace(base+file+location.search+location.hash);
+  }else{
+    const base=path.endsWith("/")?path:path.slice(0,slash+1);
+    location.replace(base);
+  }
+})();
+</script>
+</body>
+</html>
